@@ -53,8 +53,10 @@ jobs:
 
       - name: npm-install
         run: |
+          cd nightwatch_CICD
           npm ci
       - run: |
+          cd nightwatch_CICD
           sudo apt-get install xvfb
       - name: Run Nightwatch tests #command for Run the job
         run: |
