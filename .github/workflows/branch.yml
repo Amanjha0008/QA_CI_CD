@@ -1,0 +1,36 @@
+name: Demo_QA
+
+on: 
+  push:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '0 0 * * 2'  # Run at 10:00 AM every Tuesday
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name : Installing Java Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '21'
+          cache: 'maven' 
+
+      - name: Installing Chrome 
+        uses: browser-actions/setup-chrome@v1
+        
+      - run: chrome --version
+      - run: |
+          cd Rest_Assured_CRUD
+          mvn clean test
+
+      - name: Upload test reports
+        if: always()  # Ensure reports are uploaded even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: Restassured-test-reports
+          path: Rest_Assured_CRUD/target/surefire-reports
