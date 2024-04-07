@@ -1,4 +1,4 @@
-name: Demo_QA
+name: CI_CD_Automation
 
 on: 
   push:
