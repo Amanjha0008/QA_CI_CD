@@ -2,12 +2,12 @@ name: Demo_QA
 
 on: 
   push:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:  
   schedule:
-    - cron: '0 0 * * 2'  # Run at 10:00 AM every Tuesday
+    - cron: '0 0 * * 2'  # Run at 12:00 AM every Tuesday
 
 jobs:
-  build:
+  Rest_Assured:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,3 +34,35 @@ jobs:
         with:
           name: Restassured-test-reports
           path: Rest_Assured_CRUD/target/surefire-reports
+
+  Nightwatch_test:
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+      
+         cache: 'npm'
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+
+      - name: npm-install
+        run: |
+          npm ci
+      - run: |
+          sudo apt-get install xvfb
+      - name: Run Nightwatch tests #command for Run the job
+        run: |
+          cd nightwatch_CICD
+          xvfb-run --auto-servernum npx nightwatch tests/loginPageTest.js --chrome env  
+
+      - name: Archive test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: nightwatch_CICD/tests_output 
