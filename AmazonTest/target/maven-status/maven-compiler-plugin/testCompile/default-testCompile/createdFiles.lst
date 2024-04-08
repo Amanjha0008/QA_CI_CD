@@ -1,0 +1,5 @@
+pages/ProductCart.class
+pages/SearchBox.class
+helper/BrowserFactory.class
+pages/ProceedToBuy.class
+test/AmazonTest.class
