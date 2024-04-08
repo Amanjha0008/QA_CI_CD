@@ -1,0 +1,180 @@
+name: CI_CD_Automation
+
+on: 
+  push:
+  workflow_dispatch:  
+  schedule:
+    - cron: '0 0 * * 2'  # Run at 12:00 AM every Tuesday
+
+jobs:
+  Rest_Assured:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name : Installing Java Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '21'
+          cache: 'maven' 
+
+      - name: Installing Chrome 
+        uses: browser-actions/setup-chrome@v1
+        
+      - run: chrome --version
+      - run: |
+          cd Rest_Assured_CRUD
+          mvn clean test
+
+      - name: Upload test reports
+        if: always()  # Ensure reports are uploaded even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: Restassured-test-reports
+          path: Rest_Assured_CRUD/target/surefire-reports
+
+  Nightwatch_test:
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+      
+         cache: 'npm'
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+
+      - name: npm-install
+        run: |
+          cd nightwatch_CICD
+          npm ci
+      - run: |
+          cd nightwatch_CICD
+          sudo apt-get install xvfb
+      - name: Run Nightwatch tests #command for Run the job
+        run: |
+          cd nightwatch_CICD
+          xvfb-run --auto-servernum npx nightwatch tests/loginPageTest.js --chrome env  
+
+      - name: Archive test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: nightwatch_CICD/tests_output 
+  postman_test:
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js and Newman (globally)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '21'
+
+      - name: Install Newman globally
+        run: npm install -g newman
+
+      - name: Install htmlextra-export reporter (globally)
+        run: npm install -g newman-reporter-htmlextra
+
+      - name: Run Postman tests (with increased verbosity)
+        run: newman run --verbose "postman_assignment01/Postman_GoRest_Assignment.postman_collection.json" -e "postman_assignment01/API_env.postman_environment.json" -r htmlextra --reporter-htmlextra-export testReport.html
+
+      - name: Upload Postman Test Report
+        if: always()  # Ensure reports are uploaded even if tests fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: Postman_Test_Report
+          path: testReport.html
+          
+  Jmeter_Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Download and Install JMeter
+        run: |
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xf apache-jmeter-5.6.3.tgz
+          sudo mv apache-jmeter-5.6.3 /opt/
+          echo 'export PATH=/opt/apache-jmeter-5.6.3/bin:$PATH' >> ~/.bashrc
+          source ~/.bashrc
+      - name: Run JMeter Tests
+        run: /opt/apache-jmeter-5.6.3/bin/jmeter -n -t "Performance_Testing/ApacheJmeter/task2_recordingPages.jmx"
+
+
+      - name: Upload JMeter Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-test-report
+          path: Performance_Testing/ApacheJmeter
+          if-no-files-found: error
+  Selenium:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installing Java Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Installing Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Set Chrome and ChromeDriver paths
+        run: |
+          cd AmazonTest
+          echo "CHROME_BIN=$(which google-chrome)" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
+
+      - name: Display Chrome version
+        run: google-chrome --version
+
+      - name: Display ChromeDriver version
+        run: chromedriver --version
+
+      - name: Create src/test/resources directory
+        run: |
+          cd AmazonTest
+          mkdir -p src/test/resources
+
+      - name: Create testng.xml file
+        run: |
+          cd AmazonTest
+          echo "<!DOCTYPE suite SYSTEM 'https://testng.org/testng-1.0.dtd' > <suite name='AllTests' parallel='tests'> <test name='ChromeTest'> <parameter name='browser' value='chrome' /> <classes> <class name='test.AmazonTest' /> </classes> </test> </suite>" >> src/test/resources/testng.xml
+
+      - name: Set up Chrome options
+        run: |
+          cd AmazonTest
+          echo "chromeOptions.binary=$CHROME_BIN" >> src/test/resources/testng.xml
+
+      - run: |
+          cd AmazonTest
+          mvn clean test
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Selenium-test-reports
+          path: AmazonTest/target/surefire-reports

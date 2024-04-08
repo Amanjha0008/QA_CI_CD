@@ -1,0 +1,50 @@
+name: Selenium_Pipeline
+
+on:
+  push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installing Java Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Installing Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Set Chrome and ChromeDriver paths
+        run: |
+          echo "CHROME_BIN=$(which google-chrome)" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
+
+      - name: Display Chrome version
+        run: google-chrome --version
+
+      - name: Display ChromeDriver version
+        run: chromedriver --version
+
+      - name: Create src/test/resources directory
+        run: mkdir -p src/test/resources
+
+      - name: Create testng.xml file
+        run: echo "<!DOCTYPE suite SYSTEM 'https://testng.org/testng-1.0.dtd' > <suite name='AllTests' parallel='tests'> <test name='ChromeTest'> <parameter name='browser' value='chrome' /> <classes> <class name='test.AmazonTest' /> </classes> </test> </suite>" >> src/test/resources/testng.xml
+
+      - name: Set up Chrome options
+        run: echo "chromeOptions.binary=$CHROME_BIN" >> src/test/resources/testng.xml
+
+      - run: mvn clean test
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Selenium-test-reports
+          path: target/surefire-reports

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="3" passed="3" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2024-04-08T11:26:55 IST" name="Surefire suite" finished-at="2024-04-08T11:27:23 IST" duration-ms="27514">
+    <groups>
+    </groups>
+    <test started-at="2024-04-08T11:26:55 IST" name="Surefire test" finished-at="2024-04-08T11:27:23 IST" duration-ms="27514">
+      <class name="test.AmazonTest">
+        <test-method is-config="true" signature="setup()[pri:0, instance:test.AmazonTest@65f095f8]" started-at="2024-04-08T11:26:55 IST" name="setup" finished-at="2024-04-08T11:27:09 IST" duration-ms="13378" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="SearchAndClickFirstProduct()[pri:0, instance:test.AmazonTest@65f095f8]" started-at="2024-04-08T11:27:09 IST" name="SearchAndClickFirstProduct" finished-at="2024-04-08T11:27:20 IST" duration-ms="11461" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- SearchAndClickFirstProduct -->
+        <test-method signature="addToCart()[pri:1, instance:test.AmazonTest@65f095f8]" started-at="2024-04-08T11:27:20 IST" name="addToCart" finished-at="2024-04-08T11:27:20 IST" duration-ms="170" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- addToCart -->
+        <test-method signature="proceedBuy()[pri:1, instance:test.AmazonTest@65f095f8]" started-at="2024-04-08T11:27:20 IST" name="proceedBuy" finished-at="2024-04-08T11:27:23 IST" duration-ms="2470" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- proceedBuy -->
+      </class> <!-- test.AmazonTest -->
+    </test> <!-- Surefire test -->
+  </suite> <!-- Surefire suite -->
+</testng-results>

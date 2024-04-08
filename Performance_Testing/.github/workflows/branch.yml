@@ -1,0 +1,39 @@
+name: Automated Testing
+
+on: 
+  push:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '0 10 * * 1'  # Run at 10:00 AM every Monday
+
+
+jobs:
+  Jmeter_Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Download and Install JMeter
+        run: |
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xf apache-jmeter-5.6.3.tgz
+          sudo mv apache-jmeter-5.6.3 /opt/
+          echo 'export PATH=/opt/apache-jmeter-5.6.3/bin:$PATH' >> ~/.bashrc
+          source ~/.bashrc
+      - name: Run JMeter Tests
+        run: /opt/apache-jmeter-5.6.3/bin/jmeter -n -t "ApacheJmeter/task2_recordingPages.jmx"
+
+
+      - name: Upload JMeter Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-test-report
+          path: ApacheJmeter
+          if-no-files-found: error
